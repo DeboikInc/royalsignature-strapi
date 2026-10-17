@@ -1,0 +1,13 @@
+{
+  "kind": "collectionType",
+  "collectionName": "availability_blocks",
+  "info": { "singularName": "availability-block", "pluralName": "availability-blocks", "displayName": "Availability Block" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "check_in_date": { "type": "date", "required": true },
+    "check_out_date": { "type": "date", "required": true },
+    "reason": { "type": "string" },
+    "block_status": { "type": "enumeration", "enum": ["active", "inactive"], "default": "active", "required": true },
+    "accommodation": { "type": "relation", "relation": "manyToOne", "target": "api::accommodation.accommodation", "inversedBy": "availability_blocks" }
+  }
+}

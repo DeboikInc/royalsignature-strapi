@@ -1,0 +1,12 @@
+{
+  "collectionName": "components_pricing_season_prices",
+  "info": { "displayName": "Season Price" },
+  "options": {},
+  "attributes": {
+    "priority": { "type": "integer", "default": 0 },
+    "base_price": { "type": "decimal", "required": true, "min": 0 },
+    "base_adults": { "type": "integer", "min": 0 },
+    "base_children": { "type": "integer", "min": 0 },
+    "season": { "type": "relation", "relation": "manyToOne", "target": "api::season.season" }
+  }
+}

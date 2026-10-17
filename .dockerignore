@@ -1,0 +1,15 @@
+.git
+.next
+node_modules
+**/node_modules
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+backend/.tmp
+backend/.cache
+backend/build
+backend/public/uploads
+coverage

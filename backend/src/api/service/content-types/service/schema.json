@@ -1,0 +1,14 @@
+{
+  "kind": "collectionType",
+  "collectionName": "services",
+  "info": { "singularName": "service", "pluralName": "services", "displayName": "Service" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "price": { "type": "decimal", "min": 0, "default": 0 },
+    "repeatability": { "type": "enumeration", "enum": ["once", "per_day"], "default": "once" },
+    "wp_id": { "type": "integer", "unique": true },
+    "seed_key": { "type": "string", "unique": true },
+    "accommodation_types": { "type": "relation", "relation": "manyToMany", "target": "api::accommodation-type.accommodation-type", "mappedBy": "services" }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "kind": "collectionType",
+  "collectionName": "reviews",
+  "info": { "singularName": "review", "pluralName": "reviews", "displayName": "Review" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "email": { "type": "email" },
+    "review": { "type": "text", "required": true },
+    "title": { "type": "string" },
+    "rating": { "type": "integer", "required": true, "min": 1, "max": 5 },
+    "date": { "type": "datetime" },
+    "post_id": { "type": "integer" },
+    "review_status": { "type": "enumeration", "enum": ["pending", "approved", "rejected"], "default": "pending" },
+    "wp_id": { "type": "integer", "unique": true },
+    "seed_key": { "type": "string", "unique": true },
+    "accommodation_type": { "type": "relation", "relation": "manyToOne", "target": "api::accommodation-type.accommodation-type", "inversedBy": "reviews" }
+  }
+}

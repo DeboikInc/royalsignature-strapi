@@ -1,0 +1,143 @@
+{
+  "kind": "collectionType",
+  "collectionName": "bookings",
+  "info": {
+    "singularName": "booking",
+    "pluralName": "bookings",
+    "displayName": "Booking"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "check_in_date": {
+      "type": "date",
+      "required": true
+    },
+    "check_out_date": {
+      "type": "date",
+      "required": true
+    },
+    "nights": {
+      "type": "integer",
+      "min": 1
+    },
+    "adults": {
+      "type": "integer",
+      "required": true,
+      "min": 1
+    },
+    "children": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "accommodation_type": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::accommodation-type.accommodation-type"
+    },
+    "accommodation": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::accommodation.accommodation",
+      "inversedBy": "bookings"
+    },
+    "rate": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::rate.rate"
+    },
+    "services": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service.service"
+    },
+    "guest_name": {
+      "type": "string"
+    },
+    "guest_email": {
+      "type": "email"
+    },
+    "guest_phone": {
+      "type": "string"
+    },
+    "customer_details": {
+      "type": "json"
+    },
+    "guest_consent": {
+      "type": "boolean",
+      "default": false
+    },
+    "special_requests": {
+      "type": "text"
+    },
+    "coupon_code": {
+      "type": "string"
+    },
+    "booking_status": {
+      "type": "enumeration",
+      "enum": [
+        "pending-payment",
+        "confirmed",
+        "cancelled",
+        "expired"
+      ],
+      "default": "pending-payment",
+      "required": true
+    },
+    "payment_status": {
+      "type": "enumeration",
+      "enum": [
+        "pending",
+        "succeeded",
+        "failed",
+        "abandoned"
+      ],
+      "default": "pending"
+    },
+    "expires_at": {
+      "type": "datetime"
+    },
+    "total_price": {
+      "type": "decimal",
+      "min": 0
+    },
+    "price_breakdown": {
+      "type": "json"
+    },
+    "currency": {
+      "type": "string",
+      "default": "NGN"
+    },
+    "payment_gateway": {
+      "type": "string"
+    },
+    "payment_reference": {
+      "type": "string",
+      "unique": true
+    },
+    "booking_reference": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "idempotency_key": {
+      "type": "string",
+      "unique": true
+    },
+    "wp_id": {
+      "type": "integer",
+      "unique": true
+    },
+    "seed_key": {
+      "type": "string",
+      "unique": true
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    }
+  }
+}

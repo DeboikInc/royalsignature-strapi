@@ -1,0 +1,43 @@
+{
+  "name": "royal-signature-hotel",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0 <=26.x.x"
+  },
+  "scripts": {
+    "dev": "next dev -p 3100",
+    "build": "next build",
+    "start": "next start -p 3100",
+    "lint": "next lint",
+    "strapi:dev": "npm --prefix backend run develop",
+    "strapi:build": "npm --prefix backend run build",
+    "test:backend": "npm --prefix backend test",
+    "db:up": "docker compose --env-file .env.local up -d --build --wait mariadb strapi",
+    "db:down": "docker compose --env-file .env.local down",
+    "db:logs": "docker compose --env-file .env.local logs -f mariadb strapi",
+    "db:reset": "docker compose --env-file .env.local down -v && docker compose --env-file .env.local up -d --build --wait mariadb strapi && docker compose --env-file .env.local exec -T strapi npm run seed",
+    "seed": "docker compose --env-file .env.local exec -T strapi npm run seed"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@paystack/inline-js": "^2.22.7",
+    "@types/react-datepicker": "^7.0.0",
+    "cross-fetch": "^4.1.0",
+    "framer-motion": "^12.23.12",
+    "next": "15.4.10",
+    "react": "19.1.0",
+    "react-datepicker": "^8.4.0",
+    "react-dom": "19.1.0",
+    "react-icons": "^5.5.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.5",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1"
+  }
+}

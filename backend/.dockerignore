@@ -1,0 +1,10 @@
+node_modules
+.env
+.env.*
+!.env.example
+.strapi
+dist
+build
+coverage
+public/uploads
+npm-debug.log*

@@ -1,0 +1,20 @@
+{
+  "kind": "collectionType",
+  "collectionName": "rates",
+  "info": { "singularName": "rate", "pluralName": "rates", "displayName": "Rate" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "rate_status": { "type": "enumeration", "enum": ["active", "inactive"], "default": "active" },
+    "description": { "type": "richtext" },
+    "currency": { "type": "string", "default": "NGN", "required": true },
+    "minimum_stay": { "type": "integer", "min": 1, "default": 1 },
+    "maximum_stay": { "type": "integer", "min": 1 },
+    "refundability": { "type": "enumeration", "enum": ["refundable", "non-refundable", "conditional"], "default": "refundable" },
+    "cancellation_terms": { "type": "text" },
+    "accommodation_type": { "type": "relation", "relation": "manyToOne", "target": "api::accommodation-type.accommodation-type", "inversedBy": "rates" },
+    "season_prices": { "type": "component", "repeatable": true, "component": "pricing.season-price" },
+    "wp_id": { "type": "integer", "unique": true },
+    "seed_key": { "type": "string", "unique": true }
+  }
+}

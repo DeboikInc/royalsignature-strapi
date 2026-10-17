@@ -1,0 +1,48 @@
+{
+  "name": "royal-signature-hotel-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Strapi application",
+  "scripts": {
+    "build": "strapi build",
+    "test": "node --test tests/*.test.js",
+    "seed": "node scripts/seed.js",
+    "console": "strapi console",
+    "deploy": "strapi deploy",
+    "dev": "strapi develop",
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "strapi": "strapi",
+    "upgrade": "npx @strapi/upgrade latest",
+    "upgrade:dry": "npx @strapi/upgrade latest --dry"
+  },
+  "dependencies": {
+    "@strapi/database": "5.57.0",
+    "@strapi/plugin-users-permissions": "5.57.0",
+    "@strapi/strapi": "5.57.0",
+    "mysql2": "3.20.0",
+    "prismjs": "1.30.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.30.3",
+    "styled-components": "^6.0.0"
+  },
+  "optionalDependencies": {
+    "@swc/core-linux-x64-musl": "1.16.18",
+    "@rollup/rollup-linux-x64-musl": "4.64.7"
+  },
+  "overrides": {
+    "@strapi/admin": "5.57.0",
+    "framer-motion": "12.40.0",
+    "motion-dom": "12.40.0",
+    "motion-utils": "12.39.0"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=26.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "5f517a25-8f45-4e97-bcb6-b1fa11e1f3c7",
+    "installId": "c59618424cbac91219d9f246c9b8376e4e4fa5b0f4939f654ac70af33884ee15"
+  }
+}

@@ -1,0 +1,74 @@
+name: royal-signature-hotel
+
+services:
+  mariadb:
+    container_name: royal-signature-mariadb
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE:?Set MARIADB_DATABASE in .env.local}
+      MARIADB_USER: ${MARIADB_USER:?Set MARIADB_USER in .env.local}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?Set MARIADB_PASSWORD in .env.local}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env.local}
+    ports:
+      - "127.0.0.1:${MARIADB_PORT:-3317}:3306"
+    volumes:
+      - royal_signature_mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 15s
+
+  strapi:
+    container_name: royal-signature-strapi
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      HOST: 0.0.0.0
+      PORT: 1337
+      DATABASE_CLIENT: mysql
+      DATABASE_HOST: mariadb
+      DATABASE_PORT: 3306
+      DATABASE_NAME: ${MARIADB_DATABASE:?Set MARIADB_DATABASE in .env.local}
+      DATABASE_USERNAME: ${MARIADB_USER:?Set MARIADB_USER in .env.local}
+      DATABASE_PASSWORD: ${MARIADB_PASSWORD:?Set MARIADB_PASSWORD in .env.local}
+      DATABASE_SSL: "false"
+      APP_KEYS: ${APP_KEYS:?Set APP_KEYS in .env.local}
+      API_TOKEN_SALT: ${API_TOKEN_SALT:?Set API_TOKEN_SALT in .env.local}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:?Set ADMIN_JWT_SECRET in .env.local}
+      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT:?Set TRANSFER_TOKEN_SALT in .env.local}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env.local}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?Set ENCRYPTION_KEY in .env.local}
+      INTERNAL_WEBHOOK_SECRET: ${INTERNAL_WEBHOOK_SECRET:?Set INTERNAL_WEBHOOK_SECRET in .env.local}
+      PAYMENT_MODE: ${PAYMENT_MODE:-test}
+      CORS_ORIGINS: ${CORS_ORIGINS:?Set CORS_ORIGINS in .env.local}
+    ports:
+      - "127.0.0.1:${STRAPI_PORT:-1437}:1337"
+    volumes:
+      - royal_signature_strapi_uploads:/srv/app/backend/public/uploads
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "node", "-e", "fetch('http://127.0.0.1:1337/_health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))" ]
+      interval: 10s
+      timeout: 5s
+      retries: 24
+      start_period: 45s
+
+volumes:
+  royal_signature_mariadb_data:
+    name: royal_signature_mariadb_data
+  royal_signature_strapi_uploads:
+    name: royal_signature_strapi_uploads
+
+networks:
+  default:
+    name: royal_signature_network

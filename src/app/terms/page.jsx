@@ -1,0 +1,5 @@
+export const metadata = { title: 'Terms & Conditions | Royal Signature Hotel and Suites', alternates: { canonical: '/terms' } };
+
+export default function TermsPage() {
+  return <main><section className="page-hero"><div className="page-hero-inner"><p className="eyebrow">Before you book</p><h1>Terms &amp; conditions</h1><p>Draft for hotel and legal review before launch.</p></div></section><section className="page-content"><h2>Rates and availability</h2><p>Displayed room prices are initial supplied starting rates and must be confirmed by the hotel. Availability is subject to active room inventory and confirmation by the booking system.</p><h2>Reservations and payment</h2><p>A reservation is not confirmed solely by submitting a form or returning from a payment page. Booking status changes only after the server verifies payment through the configured provider.</p><h2>Policies still required</h2><p>Check-in and check-out times, cancellation and refund terms, deposits, occupancy rules, extra charges, and guest conduct policies must be supplied and approved by the hotel before launch.</p></section></main>;
+}

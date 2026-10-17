@@ -1,0 +1,13 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tags",
+  "info": { "singularName": "tag", "pluralName": "tags", "displayName": "Tag" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "color": { "type": "string" },
+    "wp_id": { "type": "integer", "unique": true },
+    "seed_key": { "type": "string", "unique": true },
+    "accommodation_types": { "type": "relation", "relation": "manyToMany", "target": "api::accommodation-type.accommodation-type", "mappedBy": "tags" }
+  }
+}

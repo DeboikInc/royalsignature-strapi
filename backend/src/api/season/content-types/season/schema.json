@@ -1,0 +1,14 @@
+{
+  "kind": "collectionType",
+  "collectionName": "seasons",
+  "info": { "singularName": "season", "pluralName": "seasons", "displayName": "Season" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "start_date": { "type": "date" },
+    "end_date": { "type": "date" },
+    "priority": { "type": "integer", "default": 0 },
+    "wp_id": { "type": "integer", "unique": true },
+    "seed_key": { "type": "string", "unique": true }
+  }
+}
