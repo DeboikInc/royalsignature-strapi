@@ -2,7 +2,8 @@ FROM node:22-alpine
 
 WORKDIR /srv/app
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund --loglevel=verbose
+RUN npm ci --include=optional --os=linux --libc=musl --no-audit --no-fund --loglevel=verbose
+RUN node -e "require('sharp')"
 COPY . ./
 RUN DATABASE_CLIENT=mysql \
   DATABASE_HOST=127.0.0.1 \

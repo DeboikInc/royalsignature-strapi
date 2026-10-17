@@ -28,8 +28,10 @@
     "styled-components": "^6.0.0"
   },
   "optionalDependencies": {
-    "@swc/core-linux-x64-musl": "1.16.18",
-    "@rollup/rollup-linux-x64-musl": "4.64.7"
+    "@img/sharp-libvips-linuxmusl-x64": "1.3.3",
+    "@img/sharp-linuxmusl-x64": "0.35.4",
+    "@rollup/rollup-linux-x64-musl": "4.64.7",
+    "@swc/core-linux-x64-musl": "1.16.18"
   },
   "overrides": {
     "@strapi/admin": "5.57.0",

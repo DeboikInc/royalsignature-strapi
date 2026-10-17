@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { RiArrowRightLine, RiCupLine, RiHotelBedLine, RiMapPinLine } from 'react-icons/ri';
+import { RiArrowRightLine, RiCalendarEventLine, RiCupLine, RiHotelBedLine, RiMapPinLine } from 'react-icons/ri';
 import BookingSearch from './BookingSearch';
 import ReviewPreview from './ReviewPreview';
 import RoomCatalog from './RoomCatalog';
@@ -57,13 +57,19 @@ export default function RoyalHomepage() {
           <div className="experience-list">
             <Link href="/amenities"><RiHotelBedLine aria-hidden="true" /><span><strong>Rooms &amp; suites</strong><small>Explore your stay options</small></span><RiArrowRightLine aria-hidden="true" /></Link>
             <Link href="/dining"><RiCupLine aria-hidden="true" /><span><strong>Dining</strong><small>Details coming soon</small></span><RiArrowRightLine aria-hidden="true" /></Link>
-            <Link href="/events"><span className="experience-letter" aria-hidden="true">E</span><span><strong>Events</strong><small>Facilities to be confirmed</small></span><RiArrowRightLine aria-hidden="true" /></Link>
+            <Link href="/events"><RiCalendarEventLine className="experience-icon" aria-hidden="true" /><span><strong>Events</strong><small>Facilities to be confirmed</small></span><RiArrowRightLine aria-hidden="true" /></Link>
           </div>
         </div>
       </section>
 
       <section className="reviews-section section-wrap">
-        <div className="section-heading"><div><p className="eyebrow eyebrow-dark">From our guests</p><h2>Guest notes</h2></div><Link href="/reviews" className="text-link">All reviews <RiArrowRightLine aria-hidden="true" /></Link></div>
+        <div className="section-heading">
+          <div><p className="eyebrow eyebrow-dark">From our guests</p><h2>Guest notes</h2></div>
+          <div className="review-actions">
+            <Link href="/reviews" className="text-link">All reviews <RiArrowRightLine aria-hidden="true" /></Link>
+            <Link href="/reviews#write-review" className="button button-gold">Leave a review</Link>
+          </div>
+        </div>
         <ReviewPreview />
       </section>
 

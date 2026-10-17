@@ -21,14 +21,14 @@ export default function Toast({ message, type = 'success', duration = 3000, onCl
     success: 'bg-green-100 border-green-500 text-green-700',
     error: 'bg-red-100 border-red-500 text-red-700',
     warning: 'bg-yellow-100 border-yellow-500 text-yellow-700',
-    info: 'bg-blue-100 border-blue-500 text-blue-700',
+    info: 'bg-[#F8F5F0] border-[#C9A961] text-[#2A2A2A]',
   };
 
   const toastIcons = {
     success: <CheckIcon className="h-5 w-5 text-green-500" />,
     error: <XMarkIcon className="h-5 w-5 text-red-500" />,
     warning: <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500" />,
-    info: <InformationCircleIcon className="h-5 w-5 text-blue-500" />,
+    info: <InformationCircleIcon className="h-5 w-5 text-[#0F1B2D]" />,
   };
 
   return (

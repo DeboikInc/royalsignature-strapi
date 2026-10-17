@@ -77,33 +77,10 @@ async function proxy(request, context) {
     const isPublicPost = method === 'POST' && PUBLIC_POST_PATHS.some((pattern) => pattern.test(route));
     const isProtected = PROTECTED_PATHS.some((pattern) => pattern.test(route)) && ['GET', 'POST'].includes(method);
     if (!isPublic && !isPublicPost && !isProtected) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    
+    const query = request.nextUrl.searchParams.toString();
+    const body = method === 'POST' ? await request.text() : undefined;
 
-    const origin = request.headers.get('origin');
-    if (origin && new URL(origin).origin !== request.nextUrl.origin) {
-      return NextResponse.json({ error: 'Cross-origin requests are not allowed' }, { status: 403 });
-    }
-    if (request.headers.get('sec-fetch-site') === 'cross-site') {
-      return NextResponse.json({ error: 'Cross-origin requests are not allowed' }, { status: 403 });
-    }
-
-    const query = validatedQuery(request, route);
-    let body;
-    if (method === 'POST') {
-      if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
-        return NextResponse.json({ error: 'Content-Type must be application/json' }, { status: 415 });
-      }
-      body = await request.text();
-      if (Buffer.byteLength(body, 'utf8') > 32768) {
-        return NextResponse.json({ error: 'Request body is too large' }, { status: 413 });
-      }
-      let payload;
-      try { payload = JSON.parse(body); } catch {
-        return NextResponse.json({ error: 'Invalid JSON request body' }, { status: 400 });
-      }
-      if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-        return NextResponse.json({ error: 'Request body must be a JSON object' }, { status: 400 });
-      }
-    }
     const data = await strapiRequest(`${route}${query ? `?${query}` : ''}`, {
       method,
       body,
@@ -112,6 +89,7 @@ async function proxy(request, context) {
         ? { 'x-webhook-secret': request.headers.get('x-webhook-secret') }
         : {},
     });
+
     return NextResponse.json(normalizeMedia(data));
   } catch (error) {
     return NextResponse.json(

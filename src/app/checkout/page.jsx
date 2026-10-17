@@ -2,6 +2,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { RiPencilLine, RiArrowRightLine, RiBankCardLine, RiShieldCheckLine, RiFlutterFill } from 'react-icons/ri'
 import { createBooking, fetchRateById, fetchAccommodationTypeById, fetchBooking, payWithPaystack, payWithFlutterwave } from '@/app/api'
@@ -189,7 +190,7 @@ export default function CheckOut() {
       }
       addToast(booking.message, 'success')
     } catch (err) {
-      addToast('Failed to process booking. Please try again.', 'error')
+      addToast(err instanceof Error ? err.message : 'Failed to process booking. Please try again.', 'error')
     } finally {
       setLoading(false)
     }
@@ -227,9 +228,16 @@ export default function CheckOut() {
     }
   }
 
-  const nextStep = () => {
-    setActiveStep(prev => Math.min(prev + 1, 3))
-    scrollTo({ top: 0, behavior: 'smooth' })
+  if (!rateId || !apartmentId || !checkIn || !checkOut) {
+    return (
+      <main className="page-content">
+        <div className="status-panel">
+          <h1>Choose a room before checkout</h1>
+          <p>Check availability first so your stay dates and room can be confirmed.</p>
+          <Link href="/booking" className="text-link">Choose dates and rooms</Link>
+        </div>
+      </main>
+    )
   }
 
   if (loading) {
@@ -238,16 +246,11 @@ export default function CheckOut() {
 
   if (!bookingData) {
     return (
-      <main className="pt-28">
-        <div className="container mx-auto px-4 py-16 max-w-7xl text-center">
-          <h2 className="text-2xl font-bold mb-4">Booking Not Found</h2>
-          <p className="mb-6">We couldn't retrieve your booking details.</p>
-          <button
-            onClick={() => router.push('/')}
-            className="bg-accent hover:bg-accent/90 text-white px-6 py-3 rounded-lg"
-          >
-            Back to Home
-          </button>
+      <main className="page-content">
+        <div className="status-panel">
+          <h1>Booking Not Found</h1>
+          <p>We couldn't retrieve your booking details.</p>
+          <Link href="/booking" className="text-link">Check availability</Link>
         </div>
       </main>
     )
@@ -365,12 +368,6 @@ export default function CheckOut() {
                           name="customer.first_name"
                           value={formData.customer.first_name}
                           onChange={handleInputChange}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && activeStep < 3) {
-                              e.preventDefault();
-                              nextStep();
-                            }
-                          }}
                           className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
                           required
                         />
@@ -382,12 +379,6 @@ export default function CheckOut() {
                           name="customer.last_name"
                           value={formData.customer.last_name}
                           onChange={handleInputChange}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && activeStep < 3) {
-                              e.preventDefault();
-                              nextStep();
-                            }
-                          }}
                           className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
                           required
                         />
@@ -399,12 +390,6 @@ export default function CheckOut() {
                           name="customer.email"
                           value={formData.customer.email}
                           onChange={handleInputChange}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && activeStep < 3) {
-                              e.preventDefault();
-                              nextStep();
-                            }
-                          }}
                           className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
                           required
                         />
@@ -416,12 +401,6 @@ export default function CheckOut() {
                           name="customer.phone"
                           value={formData.customer.phone}
                           onChange={handleInputChange}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && activeStep < 3) {
-                              e.preventDefault();
-                              nextStep();
-                            }
-                          }}
                           className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
                           required
                         />
@@ -694,12 +673,6 @@ export default function CheckOut() {
                           name="customer.state"
                           value={formData.customer.state}
                           onChange={handleInputChange}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && activeStep < 3) {
-                              e.preventDefault();
-                              nextStep();
-                            }
-                          }}
                           className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
                         />
                       </div>
@@ -710,12 +683,6 @@ export default function CheckOut() {
                           name="customer.city"
                           value={formData.customer.city}
                           onChange={handleInputChange}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && activeStep < 3) {
-                              e.preventDefault();
-                              nextStep();
-                            }
-                          }}
                           className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
                         />
                       </div>
@@ -726,12 +693,6 @@ export default function CheckOut() {
                           name="coupon_code"
                           value={formData.coupon_code}
                           onChange={handleInputChange}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && activeStep < 3) {
-                              e.preventDefault();
-                              nextStep();
-                            }
-                          }}
                           className="w-full py-2 px-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-accent"
                         />
                       </div>
@@ -842,4 +803,3 @@ export default function CheckOut() {
     </main>
   )
 }
-

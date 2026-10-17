@@ -1,12 +1,13 @@
 import Link from 'next/link';
-import BrandMark from './BrandMark';
 
 export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-main">
         <div className="footer-brand">
-          <BrandMark light />
+          <Link href="/" className="footer-brand-logo" aria-label="Royal Signature Hotel and Suites home">
+            <img src="/royal-signature-footer-mark.png" alt="Royal Signature Hotel and Suites" />
+          </Link>
           <p>Where Every Stay Is Unique.</p>
           <p>Ojo Road, Ojo, Lagos State, Nigeria</p>
         </div>
@@ -27,6 +28,7 @@ export default function Footer() {
         <div>
           <h2>Information</h2>
           <Link href="/reviews">Guest reviews</Link>
+          <Link href="/reviews#write-review">Leave a review</Link>
           <Link href="/privacy-policy">Privacy policy</Link>
           <Link href="/terms">Terms &amp; conditions</Link>
           <p className="footer-pending">Phone, email and social links pending confirmation</p>

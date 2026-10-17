@@ -3,20 +3,16 @@
 const { createCoreController } = require('@strapi/strapi').factories;
 const { findPublishedAccommodationType } = require('../../../lib/publishedAccommodationType');
 
-/**
- * @param {any} media
- * @param {string[]} developmentImages
- * @returns {Record<string, any>[]}
- */
-const mapMedia = (media, developmentImages = []) => {
-  if (media?.length) return (Array.isArray(media) ? media : [media]).map((item) => ({ ...item, src: item.url }));
-  return developmentImages.map((url, index) => ({ id: `local-${index}`, url, src: url }));
+/** @param {any} media */
+const mapMedia = (media) => {
+  if (!media) return [];
+  return (Array.isArray(media) ? media : [media]).map((item) => ({ ...item, src: item.url }));
 };
 /** @param {Record<string, any>} record */
 const mapAccommodationType = (record) => ({
   ...record,
   cover_image: record.cover_image ? { ...record.cover_image, src: record.cover_image.url } : null,
-  images: mapMedia(record.images?.length ? record.images : record.cover_image ? [record.cover_image] : [], record.attributes?.development_images),
+  images: mapMedia(record.images?.length ? record.images : record.cover_image),
 });
 /**
  * @param {any} strapi

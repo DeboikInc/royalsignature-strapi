@@ -1,30 +1,21 @@
 const getBaseUrl = () => {
   const baseUrl = process.env.STRAPI_URL;
   if (!baseUrl) throw new Error('STRAPI_URL is not configured');
-  let parsedUrl;
-  try {
-    parsedUrl = new URL(baseUrl);
-  } catch {
-    throw new Error('STRAPI_URL must be a valid absolute URL');
-  }
-  if (/viveeaura\.(com|org)$/i.test(parsedUrl.hostname)) {
-    throw new Error('STRAPI_URL must point to the independent Royal Signature CMS');
-  }
-  return parsedUrl.toString().replace(/\/+$/, '').replace(/\/api$/, '');
-};
+  return baseUrl.replace(/\/+$/, '').replace(/\/api$/, '');
+}
 
 export async function strapiRequest(path, options = {}) {
+  const { protected: isProtected, ...requestOptions } = options;
   const url = `${getBaseUrl()}/api/${path.replace(/^\/+/, '')}`;
-  const headers = new Headers(options.headers || {});
+  const headers = new Headers(requestOptions.headers || {});
   headers.set('Accept', 'application/json');
-  if (options.body) headers.set('Content-Type', 'application/json');
-  if (options.protected) {
+  if (requestOptions.body) headers.set('Content-Type', 'application/json');
+  if (isProtected) {
     if (!process.env.STRAPI_API_TOKEN) throw new Error('STRAPI_API_TOKEN is not configured');
     headers.set('Authorization', `Bearer ${process.env.STRAPI_API_TOKEN}`);
   }
-  delete options.protected;
 
-  const response = await fetch(url, { ...options, headers, cache: 'no-store' });
+  const response = await fetch(url, { ...requestOptions, headers, cache: 'no-store' });
   const data = await response.json().catch(() => null);
   if (!response.ok) {
     const error = new Error(data?.error?.message || data?.error || data?.message || `Strapi request failed (${response.status})`);

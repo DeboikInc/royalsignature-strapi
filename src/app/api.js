@@ -12,7 +12,9 @@ async function request(url, options = {}) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(data?.error || data?.message || `Request failed (${response.status})`);
+    const error = new Error(data?.error?.message || data?.error || data?.message || `Request failed (${response.status})`);
+    error.status = response.status;
+    throw error;
   }
 
   return data;
@@ -106,9 +108,10 @@ export async function fetchAccommodationServices(accommodationTypeId) {
 }
 
 export async function createBooking(bookingData) {
+  
   const rateId = typeof window === 'undefined'
-    ? null
-    : new URLSearchParams(window.location.search).get('rate_id');
+  ? null
+  : new URLSearchParams(window.location.search).get('rate_id');
   let idempotencyKey = null;
   if (typeof window !== 'undefined') {
     idempotencyKey = window.sessionStorage.getItem('booking-idempotency-key');

@@ -52,7 +52,7 @@ services:
     ports:
       - "127.0.0.1:${STRAPI_PORT:-1437}:1337"
     volumes:
-      - royal_signature_strapi_uploads:/srv/app/backend/public/uploads
+      - royal_signature_strapi_uploads:/srv/app/public/uploads
     depends_on:
       mariadb:
         condition: service_healthy

@@ -10,5 +10,5 @@ export async function generateMetadata({ params }) {
 
 export default async function RoomPage({ params }) {
   const { slug } = await params;
-  return <RoomDetails slug={slug} />;
+  return <RoomDetails key={slug} slug={slug} />;
 }

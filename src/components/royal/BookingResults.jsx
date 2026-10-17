@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { RiArrowRightUpLine } from 'react-icons/ri';
 import { checkAvailability, fetchAccommodationTypes, fetchRates } from '@/app/api';
 import BookingSearch from './BookingSearch';
 
@@ -64,7 +65,7 @@ export default function BookingResults() {
           return (
             <article className="availability-card" key={`${item.rate_id}-${unit.id}`}>
               <div><h2>{item.room.title}</h2><p>{money.format(stayTotal)} total for {nights} night{nights === 1 ? '' : 's'} · {money.format(nightlyEstimate)} / night estimate · {unit.name}</p><p className="content-note">This server quote is checked again when the booking hold is created.</p></div>
-              <Link className="button" href={`/checkout?${query}`}>Continue to booking <span aria-hidden="true">↗</span></Link>
+              <Link className="button" href={`/checkout?${query}`}>Continue to booking <RiArrowRightUpLine aria-hidden="true" /></Link>
             </article>
           );
         }))}

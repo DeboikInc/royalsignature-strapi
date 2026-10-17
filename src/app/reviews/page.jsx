@@ -1,298 +1,240 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from 'react';
-import { RiUserFill } from 'react-icons/ri';
-import { fetchReviews, postReview, fetchAccommodationTypes } from '@/app/api';
-import Rating from '@/components/rating';
-import Loader from '@/components/loader';
-import { useToast } from '@/context/toastContext';
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { fetchAccommodationTypes, fetchReviews, postReview } from '@/app/api';
+import BrandLoader from '@/components/royal/BrandLoader';
+
+const ratings = [5, 4, 3, 2, 1];
+const starValues = [1, 2, 3, 4, 5];
+
+function formatDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.valueOf())
+    ? ''
+    : new Intl.DateTimeFormat('en-GB', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
+}
 
 export default function ReviewPage() {
-  const [rating, setRating] = useState(0);
-  const [review, setReview] = useState('');
-  const [title, setTitle] = useState('');
   const [reviews, setReviews] = useState([]);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [post_id, setPost_id] = useState('');
-  const [accommodationType, setAccommodationType] = useState([])
+  const [accommodations, setAccommodations] = useState([]);
+  const [reviewsError, setReviewsError] = useState('');
+  const [accommodationsError, setAccommodationsError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [summary, setSummary] = useState({
-    average: 0,
-    total: 0,
-    breakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
-  });
-  const { addToast } = useToast();
-
+  const [ratingFilter, setRatingFilter] = useState('all');
+  const [rating, setRating] = useState('5');
+  const [formState, setFormState] = useState('idle');
+  const [formMessage, setFormMessage] = useState('');
 
   useEffect(() => {
-    const loadReviews = async () => {
-      try {
-        const reviewsData = await fetchReviews();
-        const fetchAccommodation = await fetchAccommodationTypes();
-        setAccommodationType(fetchAccommodation)
-        setReviews(reviewsData?.data);
-
-        // Calculate summary
-        if (reviewsData?.data?.length > 0) {
-          const total = reviewsData?.data?.length;
-          const sum = reviewsData?.data?.reduce((acc, curr) => acc !== undefined ? Number(acc) + Number(curr.rating) : 0 + parseInt(curr.rating), 0);
-
-          const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-          reviewsData?.data?.forEach(review => {
-            const stars = Math.floor(parseInt(review.rating));
-            breakdown[stars]++;
-          });
-
-          setSummary({
-            average: sum,
-            total,
-            breakdown
-          });
-        }
-      } catch (error) {
-        setLoading(false);
-        addToast(`Error loading reviews, pls try again`, 'error')
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadReviews();
+    let active = true;
+    Promise.all([
+      fetchReviews().then(({ data }) => {
+        if (active) setReviews(data);
+      }).catch((error) => {
+        if (active) setReviewsError(error.message || 'Guest reviews could not be loaded.');
+      }),
+      fetchAccommodationTypes().then((data) => {
+        if (active) setAccommodations(data);
+      }).catch((error) => {
+        if (active) setAccommodationsError(error.message || 'Room types could not be loaded.');
+      }),
+    ]).finally(() => {
+      if (active) setLoading(false);
+    });
+    return () => { active = false; };
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (rating === 0 || !review.trim() || !title.trim()) return;
+  const ratingCounts = useMemo(() => ratings.reduce((counts, value) => {
+    counts[value] = reviews.filter((review) => Number(review.rating) === value).length;
+    return counts;
+  }, {}), [reviews]);
+  const summary = useMemo(() => {
+    const total = reviews.length;
+    const average = total
+      ? reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / total
+      : 0;
+    return { total, average };
+  }, [reviews]);
+  const visibleReviews = useMemo(
+    () => ratingFilter === 'all'
+      ? reviews
+      : reviews.filter((review) => Number(review.rating) === Number(ratingFilter)),
+    [ratingFilter, reviews]
+  );
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setFormState('submitting');
+    setFormMessage('');
+    const form = event.currentTarget;
+    const values = new FormData(form);
 
     try {
-      const newReview = {
-        post_id,
-        rating: rating.toString(),
-        title,
-        review,
-        // You might want to get these from user input or auth
-        name,
-        email
-      };
-
-      const createdReview = await postReview(newReview);
-
-      // Update local state
-      setReviews([{
-        ...createdReview,
-        rating,
-        title,
-        review,
-        name: "You",
-        date: new Date()
-      }, ...reviews]);
-
-      // Reset form
-      setRating(0);
-      setReview('');
-      setTitle('');
-
-      // Update summary
-      const newTotal = summary.total + 1;
-      const newAverage = (summary.average * summary.total + rating) / newTotal;
-      const newBreakdown = { ...summary.breakdown };
-      newBreakdown[rating] = (newBreakdown[rating] || 0) + 1;
-
-      setSummary({
-        average: newAverage,
-        total: newTotal,
-        breakdown: newBreakdown
+      await postReview({
+        name: values.get('name'),
+        email: values.get('email'),
+        title: values.get('title'),
+        post_id: Number(values.get('post_id')),
+        rating: Number(values.get('rating')),
+        review: values.get('review'),
       });
-
+      form.reset();
+      setRating('5');
+      setFormState('success');
+      setFormMessage('Thank you. Your review has been submitted and will appear after approval by the hotel.');
     } catch (error) {
-      addToast(`Failed to submit review. Please try again.`, 'error')
+      setFormState('error');
+      setFormMessage(error.message || 'Your review could not be submitted. Please try again.');
     }
-  };
-
-  if (loading) {
-    return (
-      <main>
-        <Loader />
-      </main>
-    )
   }
 
+  if (loading) return <BrandLoader label="Loading guest reviews..." />;
+
   return (
-    <main className=" bg-light">
-      <div className="flex flex-col md:flex-row gap-12 max-w-7xl mx-auto px-4 py-32">
-        {/* Left Column - Reviews List */}
-        <div className="md:w-2/3">
-          <h1 className="text-3xl font-bold mb-8">Guest Reviews</h1>
+    <main>
+      <section className="page-content reviews-page">
+        <div className="reviews-layout">
+          <div className="reviews-main-column">
+            <h1>Guest Reviews</h1>
+            <section className="review-form-section" id="write-review" aria-labelledby="write-review-title">
+              <h2 id="write-review-title">Write a Review</h2>
+              {accommodationsError && <p className="review-inline-error" role="alert">{accommodationsError}</p>}
+              {!accommodationsError && accommodations.length === 0 && (
+                <p className="review-inline-error" role="status">A published room or suite is required before a review can be submitted.</p>
+              )}
+              <form className="review-form" onSubmit={handleSubmit}>
+                <label htmlFor="review-name">
+                  <span className="visually-hidden">Your Name</span>
+                  <input id="review-name" name="name" placeholder="Your Name" autoComplete="name" maxLength={120} required />
+                </label>
+                <label htmlFor="review-email">
+                  <span className="visually-hidden">Your Email</span>
+                  <input id="review-email" name="email" type="email" placeholder="Your Email" autoComplete="email" maxLength={254} required />
+                </label>
+                <label htmlFor="review-title">
+                  <span className="visually-hidden">Review Title</span>
+                  <input id="review-title" name="title" placeholder="Review Title" maxLength={180} required />
+                </label>
+                <label htmlFor="review-accommodation">
+                  <span className="visually-hidden">Select Room or Suite</span>
+                  <select id="review-accommodation" name="post_id" required defaultValue="" disabled={accommodations.length === 0}>
+                    <option value="" disabled>Select Room or Suite</option>
+                    {accommodations.map((accommodation) => (
+                      <option key={accommodation.documentId || accommodation.id} value={accommodation.id}>{accommodation.title}</option>
+                    ))}
+                  </select>
+                </label>
+                <fieldset className="review-star-picker">
+                  <legend>Your Rating</legend>
+                  <div className="review-star-options">
+                    {starValues.map((value) => (
+                      <label key={value} aria-label={`${value} star${value === 1 ? '' : 's'}`}>
+                        <input
+                          type="radio"
+                          name="rating"
+                          value={value}
+                          checked={Number(rating) === value}
+                          onChange={(event) => setRating(event.target.value)}
+                          required
+                        />
+                        <span aria-hidden="true">{value <= Number(rating) ? '★' : '☆'}</span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <label className="review-message-field" htmlFor="review-message">
+                  <span className="visually-hidden">Share your experience</span>
+                  <textarea id="review-message" name="review" placeholder="Share your experience..." minLength={10} maxLength={5000} rows={5} required />
+                </label>
+                <button className="nav-book" type="submit" disabled={formState === 'submitting' || accommodations.length === 0}>
+                  {formState === 'submitting' ? 'Submitting...' : 'Submit Review'}
+                </button>
+                {formMessage && <p className={formState === 'error' ? 'form-error' : 'form-success'} role={formState === 'error' ? 'alert' : 'status'}>{formMessage}</p>}
+              </form>
+            </section>
 
-          {/* Review Form */}
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-            <h2 className="text-xl font-bold mb-4">Write a Review</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-2 mb-4 space-x-2">
-                <div>
-                  <input
-                    type="text"
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
-                    placeholder="Your Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
+            {reviewsError ? (
+              <p className="review-load-error" role="alert">{reviewsError}</p>
+            ) : (
+              <>
+                <div className="review-list-heading">
+                  <h2>{ratingFilter === 'all' ? 'Guest Experiences' : `${ratingFilter}-Star Reviews`}</h2>
+                  <span>{visibleReviews.length} review{visibleReviews.length === 1 ? '' : 's'}</span>
                 </div>
-                <div>
-                  <input
-                    type="email"
-                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
-                    placeholder="Your Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-
-              </div>
-              <div className="mb-4">
-                <input
-                  type="text"
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
-                  placeholder="Review title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <select
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
-                  value={post_id}
-                  onChange={(e) => setPost_id(e.target.value)}
-                  required
-                >
-                  <option value="">Select Apartment</option>
-                  {accommodationType.length > 0 && accommodationType.map((item) => (
-                    <option value={item.id} key={item.id}>{item.title}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex items-center mb-4">
-                <span className="mr-3">Your Rating:</span>
-                <div className="flex">
-                  <Rating editable="true" size={25} onRatingChange={(val) => setRating(val)} className='md:space-x-2' />
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <textarea
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
-                  rows={5}
-                  placeholder="Share your experience..."
-                  value={review}
-                  onChange={(e) => setReview(e.target.value)}
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="bg-accent cursor-pointer hover:bg-accent/90 text-white px-6 py-2 rounded-lg font-medium"
-                disabled={rating === 0 || !review.trim() || !title.trim()}
-              >
-                Submit Review
-              </button>
-            </form>
+                {visibleReviews.length ? (
+                  <div className="published-review-list">
+                    {visibleReviews.map((review) => (
+                      <article className="published-review" key={review.documentId || review.id}>
+                        <div className="published-review-meta">
+                          <span className="review-avatar" aria-hidden="true">{review.name?.trim().charAt(0).toUpperCase() || 'G'}</span>
+                          <div className="review-card-content">
+                            <div className="review-card-topline">
+                              <h3>{review.name}</h3>
+                              {formatDate(review.date) && <time dateTime={review.date}>{formatDate(review.date)}</time>}
+                            </div>
+                            <div className="published-review-rating" aria-label={`${review.rating} out of 5 stars`}>
+                              {'★'.repeat(Number(review.rating) || 0)}
+                              <span className="visually-hidden">{review.rating} out of 5 stars</span>
+                            </div>
+                            {review.accommodation_type?.title && <p className="review-room-name">{review.accommodation_type.title}</p>}
+                            {review.title && <h4>{review.title}</h4>}
+                            <p className="review-body">{review.review}</p>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="review-empty-state">
+                    <h2>{reviews.length ? 'No reviews match this filter' : 'No approved reviews yet'}</h2>
+                    <p>{reviews.length ? 'Choose another rating to see guest feedback.' : 'Guest reviews will appear here after approval by the hotel.'}</p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
-          {/* Reviews List */}
-          <div className="space-y-6">
-            {reviews.map((item, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-start mb-4">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-4">
-                    <RiUserFill className="text-gray-400 text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold">{item.name}</h3>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Rating initialValue={item.rating} />
-                      <span>•</span>
-                      <span className="ml-2">
-                        {new Date(item.date).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <h4 className="font-medium mb-2">{item.title}</h4>
-                <p className="text-gray-700 overflow-auto">{item.review}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right Column - Rating Summary */}
-        <div className="md:w-1/3">
-          <div className="bg-white rounded-xl shadow-sm p-6 sticky top-6">
-            <h2 className="text-xl font-bold mb-4">Rating Summary</h2>
-
-            <div className="flex items-center mb-6">
-              <div className="text-5xl font-bold mr-4">
-                {summary.average.toFixed(1)}
-              </div>
-              <div>
-                <Rating initialValue={summary.average.toFixed(1)} />
-                <div className="text-sm text-gray-500">
-                  Based on {summary.total} reviews
+          <aside className="review-sidebar" aria-label="Review ratings and filters">
+            <section className="rating-summary">
+              <h2>Rating Summary</h2>
+              <div className="rating-total">
+                <strong>{summary.average.toFixed(1)}</strong>
+                <div>
+                  <span className="rating-total-stars" aria-label={`${summary.average.toFixed(1)} out of 5 stars`}>
+                    {'★'.repeat(Math.round(summary.average))}
+                    <span className="visually-hidden">{summary.average.toFixed(1)} out of 5 stars</span>
+                  </span>
+                  <small>{summary.total} approved review{summary.total === 1 ? '' : 's'}</small>
                 </div>
               </div>
-            </div>
-
-            {/* Rating Breakdown */}
-            <div className="space-y-3">
-              {[5, 4, 3, 2, 1].map((stars) => (
-                <div key={stars} className="flex items-center">
-                  <div className="w-10 text-sm font-medium">{stars} star</div>
-                  <div className="flex-1 mx-2 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-yellow-400"
-                      style={{
-                        width: `${summary.total > 0
-                          ? (summary.breakdown[stars] / summary.total * 100)
-                          : 0}%`
-                      }}
-                    />
+              <div className="rating-breakdown">
+                {ratings.map((value) => (
+                  <div className="rating-breakdown-row" key={value}>
+                    <span>{value} star{value === 1 ? '' : 's'}</span>
+                    <span className="rating-track"><span style={{ width: `${summary.total ? (ratingCounts[value] / summary.total) * 100 : 0}%` }} /></span>
+                    <span>{summary.total ? Math.round((ratingCounts[value] / summary.total) * 100) : 0}%</span>
                   </div>
-                  <div className="w-8 text-sm text-gray-500 text-right">
-                    {summary.total > 0
-                      ? `${Math.round(summary.breakdown[stars] / summary.total * 100)}%`
-                      : '0%'}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Review Filters */}
-            <div className="mt-8">
-              <h3 className="font-medium mb-3">Filter Reviews</h3>
-              <div className="flex flex-wrap gap-2">
-                {['All', '5 Star', '4 Star', '3 Star'].map((filter) => (
-                  <button
-                    key={filter}
-                    className="px-3 py-1 text-sm rounded-full border border-gray-200 hover:border-accent hover:text-accent"
-                  >
-                    {filter}
+                ))}
+              </div>
+            </section>
+            <section className="review-filter-panel" aria-labelledby="review-filter-title">
+              <h2 id="review-filter-title">Filter Reviews</h2>
+              <div className="review-filter-options">
+                <button  type="button" aria-pressed={ratingFilter === 'all'} onClick={() => setRatingFilter('all')}>All</button>
+                {ratings.map((value) => (
+                  <button type="button" key={value} aria-pressed={ratingFilter === String(value)} onClick={() => setRatingFilter(String(value))}>
+                    {value} Star
                   </button>
                 ))}
               </div>
-            </div>
-          </div>
+            </section>
+            <p className="review-sidebar-note">Reviews are shown after moderation by the hotel.</p>
+            <Link href="/rooms" className="review-sidebar-link">Explore our rooms</Link>
+          </aside>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

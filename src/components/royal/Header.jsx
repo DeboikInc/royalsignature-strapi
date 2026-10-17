@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { RiCloseLine, RiMenuLine } from 'react-icons/ri';
+import { RiArrowRightUpLine, RiCloseLine, RiMenuLine } from 'react-icons/ri';
 import BrandMark from './BrandMark';
 
 const links = [
   ['/', 'Home'], ['/about', 'About'], ['/rooms', 'Rooms & Suites'],
   ['/amenities', 'Amenities'], ['/dining', 'Dining'], ['/events', 'Events'],
-  ['/gallery', 'Gallery'], ['/contact', 'Contact'],
+  ['/gallery', 'Gallery'], ['/reviews', 'Guest Reviews'], ['/contact', 'Contact'],
 ];
 
 export default function Header() {
@@ -30,7 +30,7 @@ export default function Header() {
               {label}
             </Link>
           ))}
-          <Link className="nav-book" href="/booking" onClick={close}>Book Now <span aria-hidden="true">↗</span></Link>
+          <Link className="nav-book" href="/booking" onClick={close}>Book Now <RiArrowRightUpLine aria-hidden="true" /></Link>
         </nav>
       </div>
     </header>
