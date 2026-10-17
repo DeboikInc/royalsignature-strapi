@@ -19,6 +19,9 @@ RUN DATABASE_CLIENT=mysql \
   INTERNAL_WEBHOOK_SECRET=build_webhook_secret \
   npm run build
 
+RUN mkdir -p /srv/app/public/uploads \
+  && chown -R node:node /srv/app/public/uploads
+
 ENV NODE_ENV=production
 EXPOSE 1337
 CMD ["npm", "run", "start"]
