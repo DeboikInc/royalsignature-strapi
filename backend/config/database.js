@@ -13,9 +13,9 @@ module.exports = ({ env }) => {
   const databaseUsername = env('DATABASE_USERNAME');
   const databaseHost = env('DATABASE_HOST');
   const databasePassword = env('DATABASE_PASSWORD');
-  // if (!databaseName?.startsWith('royal_signature_') || !databaseUsername?.startsWith('royal_signature_')) {
-  //   throw new Error('Royal Signature requires a dedicated database and user named with the royal_signature_ prefix.');
-  // }
+  if (!databaseName?.startsWith('royal_signature_') || !databaseUsername?.startsWith('royal_signature_')) {
+    throw new Error('Royal Signature requires a dedicated database and user named with the royal_signature_ prefix.');
+  }
   if (!databaseHost || /viveeaura/i.test(databaseHost) || !databasePassword) {
     throw new Error('Royal Signature requires an independent database host and password.');
   }
@@ -31,14 +31,12 @@ module.exports = ({ env }) => {
         user: databaseUsername,
         password: databasePassword,
         charset: 'utf8mb4',
-        ssl: env.bool('DATABASE_SSL', false) && {
-          key: env('DATABASE_SSL_KEY', undefined),
-          cert: env('DATABASE_SSL_CERT', undefined),
-          ca: env('DATABASE_SSL_CA', undefined),
-          capath: env('DATABASE_SSL_CAPATH', undefined),
-          cipher: env('DATABASE_SSL_CIPHER', undefined),
-          rejectUnauthorized: env.bool('DATABASE_SSL_REJECT_UNAUTHORIZED', true),
-        },
+        ssl: env.bool('DATABASE_SSL', false)
+          ? {
+            ca: env('DATABASE_SSL_CA', undefined),
+            rejectUnauthorized: true,
+          }
+          : false,
       },
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
