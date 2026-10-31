@@ -13,9 +13,9 @@ module.exports = ({ env }) => {
   const databaseUsername = env('DATABASE_USERNAME');
   const databaseHost = env('DATABASE_HOST');
   const databasePassword = env('DATABASE_PASSWORD');
-  if (!databaseName?.startsWith('royal_signature_') || !databaseUsername?.startsWith('royal_signature_')) {
-    throw new Error('Royal Signature requires a dedicated database and user named with the royal_signature_ prefix.');
-  }
+  // if (!databaseName?.startsWith('royal_signature_') || !databaseUsername?.startsWith('royal_signature_')) {
+  //   throw new Error('Royal Signature requires a dedicated database and user named with the royal_signature_ prefix.');
+  // }
   if (!databaseHost || /viveeaura/i.test(databaseHost) || !databasePassword) {
     throw new Error('Royal Signature requires an independent database host and password.');
   }
